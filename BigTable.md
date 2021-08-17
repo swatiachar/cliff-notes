@@ -72,4 +72,7 @@ The Scan Cache is most useful for applications that tend to read the same data r
 A Bloom filter allows us to ask SSTable might contain any data for a specified row/column pair. For certain applications, a small amount of tablet server memory used for storing Bloom filters drastically reduces the number of disk seeks required for read operations.
 
 #### Commit-log implementation
+#### Speeding up tablet recovery
+#### Exploiting immutability
+
 

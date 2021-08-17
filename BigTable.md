@@ -18,10 +18,6 @@ Note : 4 dimentional
 - Column Name: Uniquely identifies a column
 - Timestamp: Each column cell can have different versions of a value, each identified by a timestamp
 
-            ColumnFamily 
-        ColumnName1,ColumnName2
-Row Key TimeStamp1: Value1
-        TimeStamp2: Value2
         
 ### API
 

@@ -42,3 +42,34 @@ SSTables : The Google SSTable file format is used internally to store Bigtable d
 
 Chubby : Bigtable relies on a highly-available and persistent distributed lock service called Chubby.
 
+### Implementation
+
+Three major components:
+- a library that is linked into every client : clients communicate directly with tablet servers for reads and writes.
+- one master server : responsible for assigning tablets to tabletservers, detecting the addition and expiration of tablet servers, balancing tablet-server load, and garbage collection of files in GFS.
+- many tablet servers : Each tablet server manages a set of tablets( typically tens of thousands of tablets). The tablet server handles read and write requests to the tablets that it has loaded, and also splits tablets that have grown too large. Each tablet contains all data associated with a row range.
+
+### Tablet Assignment
+### Tablet Serving
+
+### Compactions
+As write operations execute, the size of the memtable increases. When the memtable size reaches a threshold, the memtable is frozen, a new memtable is created, and the frozen memtable is converted to an SSTable and written to GFS. This minor compaction process has two goals: it shrinks the memory usage of the tablet server, and it reduces the amount of data that has to be read from the commit log during recovery if this server dies.
+Merging compaction compacts existing SSTables to create larger SSTTables.
+
+### Refinements
+
+#### Locality Groups
+Clients can group multiple column families together into a locality group. A separate SSTable is generated for each locality group in each tablet. Segregating column families that are not typically accessed together into separate locality groups enables more efficient reads.
+
+#### Compression
+Emphasize is on speed instead of space reduction when choosing our compression algorithms.
+
+#### Caching for read performance
+To improve read performance, tablet servers use two levels of caching. The Scan Cache is a higher-level cache that caches the key-value pairs returned by the SSTable interface to the tablet server code. The Block Cache is a lower-level cache that caches SSTables blocks that were read from GFS.
+The Scan Cache is most useful for applications that tend to read the same data repeatedly. The Block Cache is useful for applications that tend to read data that is close to the data they recently read (e.g., sequential reads, or random reads of different columns in the same locality group within a hot row).
+
+#### Bloom filters
+A Bloom filter allows us to ask SSTable might contain any data for a specified row/column pair. For certain applications, a small amount of tablet server memory used for storing Bloom filters drastically reduces the number of disk seeks required for read operations.
+
+#### Commit-log implementation
+
